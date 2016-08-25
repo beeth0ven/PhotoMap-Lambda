@@ -1,6 +1,6 @@
 var Rx = require('rx');
 var AWS = require('aws-sdk');
-// AWS.config.loadFromPath('config.json');
+AWS.config.loadFromPath('config.json');
 
 // ------------ SNS ------------
 
@@ -14,14 +14,14 @@ function RxSNS() {
 
       var params = { 'Name': topicName };
 
-      console.log('Creating topic name:', topicName);
+      console.log('RxSNS Creating topic name:', topicName);
 
       sns.createTopic(params, function(error, data) {
         if (error) {
-          console.log('Did Fail to Create topic name:', topicName);
+          console.log('RxSNS Did Fail to Create topic name:', topicName);
           observer.onError(error);
         } else {
-          console.log('Did Create topic name:', topicName);
+          console.log('RxSNS Did Create topic name:', topicName);
           observer.onNext(data);
           observer.onCompleted();
         };
@@ -36,14 +36,14 @@ function RxSNS() {
 
       var params = { 'TopicArn': topicArn };
 
-      console.log('Deleting topic', topicArn);
+      console.log('RxSNS Deleting topic', topicArn);
 
       sns.deleteTopic(params, function(error, data) {
         if (error) {
-          console.log('Did Fail to Delete topic', topicArn);
+          console.log('RxSNS Did Fail to Delete topic', topicArn);
           observer.onError(error);
         } else {
-          console.log('Did Delete topic', topicArn);
+          console.log('RxSNS Did Delete topic', topicArn);
           observer.onNext(data);
           observer.onCompleted();
         };
@@ -100,7 +100,7 @@ function RxDynamoDB() {
 
     return Rx.Observable.create(function(observer) {
 
-      console.log('Updating item.');
+      console.log('RxDynamoDB Updating item.');
       var tableName = params.TableName
 
       dynamodb.updateItem(params, function(error, data) {

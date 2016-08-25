@@ -15,9 +15,9 @@ const LinkKindCommentPhoto = "2";
 
 exports.handler = function(event, context) {
 
-    event.Records.forEach(function(record) {
+  console.log(JSON.stringify(event, null, 2));
 
-      console.log(JSON.stringify(record, null, 2));
+    event.Records.forEach(function(record) {
 
         switch (record.eventName) {
           case Insert:
@@ -42,6 +42,10 @@ function linkDidInsert(record, context) {
     commentDidInsert(record, context)
       break;
 
+    case LinkKindLikePhoto:
+    likePhotoLinkDidInsert(record, context)
+        break;
+
     default:
     context.done();
       break;
@@ -54,7 +58,11 @@ function linkDidDelete(record, context) {
     case LinkKindCommentPhoto:
     commentDidDelete(record, context)
       break;
-      
+
+    case LinkKindLikePhoto:
+    likePhotoLinkDidDelete(record, context)
+          break;
+
     default:
     context.done();
       break;
@@ -81,6 +89,30 @@ function commentDidDelete(record, context) {
   linkRecord.rx_decreaseCommentCountToPhoto()
     .subscribe(
       function (x) { context.succeed("Succeed commentDidDelete."); },
+      function (error) { context.fail(error); },
+      function () { context.done(); }
+    );
+}
+
+function likePhotoLinkDidInsert(record, context) {
+
+  var linkRecord = new Link.LinkRecord(record);
+
+  linkRecord.rx_increaseLikeCountToPhoto()
+    .subscribe(
+      function (x) { context.succeed("Succeed likePhotoLinkDidInsert."); },
+      function (error) { context.fail(error); },
+      function () { context.done(); }
+    );
+}
+
+function likePhotoLinkDidDelete(record, context) {
+
+  var linkRecord = new Link.LinkRecord(record);
+
+  linkRecord.rx_decreaseLikeCountToPhoto()
+    .subscribe(
+      function (x) { context.succeed("Succeed likePhotoLinkDidDelete."); },
       function (error) { context.fail(error); },
       function () { context.done(); }
     );
