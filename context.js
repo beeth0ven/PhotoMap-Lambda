@@ -20,4 +20,4 @@ var Event = require('./models/event.js');
 
 var context = new Context();
 
-Index.handler(Event.deleteLikePhotoEvent, context)
+Index.handler(Event.insertFollowUserEvent, context)

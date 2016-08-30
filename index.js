@@ -5,14 +5,6 @@ var Photo = require('./models/photo.js');
 var Link = require('./models/link.js');
 var RxAWS = require('./rxAWS/rxAWS.js');
 
-const Insert = "INSERT";
-const Modify = "MODIFY";
-const Remove = "REMOVE";
-
-const LinkKindFollowUser = "0";
-const LinkKindLikePhoto = "1";
-const LinkKindCommentPhoto = "2";
-
 exports.handler = function(event, context) {
 
   console.log(JSON.stringify(event, null, 2));
@@ -20,11 +12,11 @@ exports.handler = function(event, context) {
   event.Records.forEach(function(record) {
 
       switch (record.eventName) {
-        case Insert:
+        case RxAWS.Insert:
         linkDidInsert(record, context);
           break;
 
-        case Remove:
+        case RxAWS.Remove:
         linkDidDelete(record, context);
           break;
 
@@ -38,11 +30,15 @@ exports.handler = function(event, context) {
 function linkDidInsert(record, context) {
 
   switch (record.dynamodb.NewImage.kindRawValue.N) {
-    case LinkKindCommentPhoto:
+    case Link.KindFollowUser:
+    followUserLinkDidInsert(record, context)
+      break;
+
+    case Link.KindCommentPhoto:
     commentDidInsert(record, context)
       break;
 
-    case LinkKindLikePhoto:
+    case Link.KindLikePhoto:
     likePhotoLinkDidInsert(record, context)
         break;
 
@@ -55,11 +51,15 @@ function linkDidInsert(record, context) {
 function linkDidDelete(record, context) {
 
   switch (record.dynamodb.OldImage.kindRawValue.N) {
-    case LinkKindCommentPhoto:
+    case Link.KindFollowUser:
+    followUserLinkDidDelete(record, context)
+      break;
+
+    case Link.KindCommentPhoto:
     commentDidDelete(record, context)
       break;
 
-    case LinkKindLikePhoto:
+    case Link.KindLikePhoto:
     likePhotoLinkDidDelete(record, context)
       break;
 
@@ -116,4 +116,33 @@ function likePhotoLinkDidDelete(record, context) {
       function (error) { context.fail(error); },
       function () { context.done(); }
     );
+}
+
+function followUserLinkDidInsert(record, context) {
+
+  console.log('Index followUserLinkDidInsert');
+
+  var linkRecord = new Link.LinkRecord(record);
+
+  //
+  // linkRecord.rx_increaseLikeCountToPhoto()
+  //   .subscribe(
+  //     function (x) { context.succeed("Index Succeed likePhotoLinkDidInsert."); },
+  //     function (error) { context.fail(error); },
+  //     function () { context.done(); }
+  //   );
+}
+
+function followUserLinkDidDelete(record, context) {
+
+  console.log('Index followUserLinkDidDelete');
+
+  var linkRecord = new Link.LinkRecord(record);
+  //
+  // linkRecord.rx_increaseLikeCountToPhoto()
+  //   .subscribe(
+  //     function (x) { context.succeed("Index Succeed likePhotoLinkDidInsert."); },
+  //     function (error) { context.fail(error); },
+  //     function () { context.done(); }
+  //   );
 }

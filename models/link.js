@@ -7,6 +7,11 @@ function LinkRecord(record) {
 
   this.record = record;
 
+  var newImage = this.record.dynamodb.NewImage
+  var oldImage = this.record.dynamodb.OldImage
+
+  this.recordImage = newImage != null ? newImage : oldImage
+
   this.rx_increaseCommentCountToPhoto = function () {
 
     console.log('LinkRecord rx_increaseCommentCountToPhoto');
@@ -68,13 +73,7 @@ function LinkRecord(record) {
 
     console.log('LinkRecord rx_updatePhoto');
 
-    var newImage = this.record.dynamodb.NewImage
-    var oldImage = this.record.dynamodb.OldImage
-    var itemReference = newImage != null ?
-        newImage.itemReference.S :
-        oldImage.itemReference.S
-
-    var keys = JSON.parse(itemReference)
+    var keys = JSON.parse(this.recordImage.itemReference.S)
     var params = {
       'Key': {
           "creationTime": {
@@ -93,3 +92,7 @@ function LinkRecord(record) {
 };
 
 exports.LinkRecord = LinkRecord;
+
+exports.KindFollowUser = "0";
+exports.KindLikePhoto = "1";
+exports.KindCommentPhoto = "2";

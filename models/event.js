@@ -1,4 +1,45 @@
 // ------------ Link ------------
+exports.insertFollowUserEvent =
+{
+    "Records": [
+        {
+            "eventID": "f9bed1bfdcdf41c6a8f00a4fba1af473",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "us-east-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1472541900,
+                "Keys": {
+                    "creationTime": {
+                        "N": "1472541916.096104"
+                    },
+                    "fromUserReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    }
+                },
+                "NewImage": {
+                    "kindRawValue": {
+                        "N": "0"
+                    },
+                    "creationTime": {
+                        "N": "1472541916.096104"
+                    },
+                    "toUserReference": {
+                        "S": "[\"us-east-1:7982e028-e401-4dff-966b-af81de9fdb88\",1471233567.026141]"
+                    },
+                    "fromUserReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    }
+                },
+                "SequenceNumber": "71742100000000008596490970",
+                "SizeBytes": 306,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:649756765455:table/photomap-mobilehub-567053031-Link/stream/2016-08-24T07:23:34.336"
+        }
+    ]
+}
 
 exports.insertLikePhotoEvent =
 {

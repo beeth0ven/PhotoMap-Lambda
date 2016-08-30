@@ -120,3 +120,7 @@ function RxDynamoDB() {
 }
 
 exports.RxDynamoDB = RxDynamoDB;
+
+exports.Insert = "INSERT";
+exports.Modify = "MODIFY";
+exports.Remove = "REMOVE";
