@@ -1,6 +1,6 @@
 var Rx = require('rx');
 var AWS = require('aws-sdk');
-// AWS.config.loadFromPath('config.json');
+AWS.config.loadFromPath('config.json');
 
 // ------------ Context ------------
 
@@ -150,6 +150,7 @@ function RxDynamoDBUpdateParams(params) {
       'Action': 'ADD',
       'Value': { 'N': number.toString() }
     }
+    return this
   }
 
   this.rx_update = function () {

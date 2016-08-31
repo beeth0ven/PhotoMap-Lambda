@@ -1,6 +1,7 @@
 var Rx = require('rx');
-var Photo = require('./models/photo.js');
 var RxAWS = require('./rxAWS/rxAWS.js');
+var UserInfo = require('./models/userInfo.js');
+var Photo = require('./models/photo.js');
 
 exports.handler = function(event, context) {
 
@@ -26,19 +27,19 @@ exports.handler = function(event, context) {
 
 function photoDidInsert(record, context) {
   console.log('Index photoDidInsert');
-  var photoRecord = new Photo.PhotoRecord(record);
-  photoRecord.rx_increasePostCountToUser()
-    .subscribe(
-      function (x)      { RxAWS.handleSucceed("photoDidInsert", context)  },
-      function (error)  { RxAWS.handleError(error, context) },
-      function ()       { RxAWS.handleDone(context) }
-    );
+    var userUpdater = new UserInfo.UserInfoUpdater(record.dynamodb.NewImage.userReference.S)
+    userUpdater.rx_increasePostedCount()
+      .subscribe(
+        function (x)      { RxAWS.handleSucceed("photoDidInsert", context)  },
+        function (error)  { RxAWS.handleError(error, context) },
+        function ()       { RxAWS.handleDone(context) }
+      );
 };
 
 function photoDidDelete(record, context) {
   console.log('Index photoDidDelete');
-  var photoRecord = new Photo.PhotoRecord(record);
-  photoRecord.rx_decreasePostCountToUser()
+  var userUpdater = new UserInfo.UserInfoUpdater(record.dynamodb.OldImage.userReference.S)
+  userUpdater.rx_decreasePostedCount()
     .subscribe(
       function (x)      { RxAWS.handleSucceed("photoDidDelete", context)  },
       function (error)  { RxAWS.handleError(error, context) },

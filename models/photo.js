@@ -1,38 +1,6 @@
-// ------------ PhotoRecord ------------
+// ------------ PhotoUpdater ------------
 
 var RxAWS = require('../rxAWS/rxAWS.js');
-var UserInfo = require('./userInfo.js');
-var rxDynamodb = new RxAWS.RxDynamoDB();
-
-function PhotoRecord(record) {
-
-  this.record = record;
-
-  this.getRecordImage = function () {
-    var newImage = this.record.dynamodb.NewImage
-    var oldImage = this.record.dynamodb.OldImage
-    return newImage != null ? newImage : oldImage
-  }
-
-  this.getUserUpdater = function () {
-    var userReference =  this.getRecordImage().userReference.S
-    return new UserInfo.UserInfoUpdater(userReference)
-  }
-
-  this.rx_increasePostCountToUser = function () {
-    console.log('PhotoRecord rx_increasePostCountToUser');
-    return this.getUserUpdater().rx_increasePostedCount()
-  }
-
-  this.rx_decreasePostCountToUser = function () {
-    console.log('PhotoRecord rx_decreasePostCountToUser');
-    return this.getUserUpdater().rx_decreasePostedCount()
-  }
-}
-
-exports.PhotoRecord = PhotoRecord;
-
-// ------------ PhotoUpdater ------------
 
 function PhotoUpdater(reference) {
 

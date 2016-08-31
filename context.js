@@ -23,8 +23,28 @@ var context = new Context();
 Index.handler(Event.deletePhotoEvent, context)
 
 // ------------ Testing RxDynamoDB ------------
-
+//
 // var RxAWS = require('./rxAWS/rxAWS.js');
+//
+// var params = {
+//   'Key': {
+//       "creationTime": {
+//           "N": '123'
+//       },
+//       "userReference": {
+//           "S": 'asdadf'
+//       }
+//     },
+//   'TableName': 'photomap-mobilehub-567053031-Photo',
+//   'AttributeUpdates': {}
+// }
+//
+// var updateParams = new RxAWS.RxDynamoDBUpdateParams(params)
+// .addNumberForKey(3, 'count')
+// .addNumberForKey(4, 'num')
+//
+// console.log(updateParams.params);
+
 //
 // var rxDynamodb = new RxAWS.RxDynamoDB();
 // var UserInfo = require('./models/userInfo.js');

@@ -4,46 +4,46 @@ var RxAWS = require('../rxAWS/rxAWS.js');
 var sns = new RxAWS.RxSNS();
 var rxDynamodb = new RxAWS.RxDynamoDB();
 
-function UserInfoRecord(record) {
-
-  this.record = record;
-
-  this.rx_createTopic = function () {
-
-    console.log('UserInfoRecord rx_createTopic');
-
-    var userId = this.record.dynamodb.Keys.userId.S;
-    var trimedUserId = userId.replace(":", "-");
-    return sns.rx_createTopic(trimedUserId)
-      .map(function (data) { return data.TopicArn })
-      .flatMap(function (topicArn) {
-
-        var params = {
-          'Key': record.dynamodb.Keys,
-          'TableName': 'photomap-mobilehub-567053031-UserInfo',
-          'AttributeUpdates': {
-            'snsTopicArn': {
-              'Action': 'PUT',
-              'Value': { 'S': topicArn }
-            }
-          }
-        };
-
-        return rxDynamodb.rx_updateItem(params);
-      });
-  };
-
-  this.rx_deleteTopic = function () {
-
-    console.log('UserInfoRecord rx_deleteTopic');
-
-    var snsTopicArn = this.record.dynamodb.OldImage.snsTopicArn.S;
-    return sns.rx_deleteTopicArn(snsTopicArn);
-  };
-};
-
-
-exports.UserInfoRecord = UserInfoRecord;
+// function UserInfoRecord(record) {
+//
+//   this.record = record;
+//
+//   this.rx_createTopic = function () {
+//
+//     console.log('UserInfoRecord rx_createTopic');
+//
+//     var userId = this.record.dynamodb.Keys.userId.S;
+//     var trimedUserId = userId.replace(":", "-");
+//     return sns.rx_createTopic(trimedUserId)
+//       .map(function (data) { return data.TopicArn })
+//       .flatMap(function (topicArn) {
+//
+//         var params = {
+//           'Key': record.dynamodb.Keys,
+//           'TableName': 'photomap-mobilehub-567053031-UserInfo',
+//           'AttributeUpdates': {
+//             'snsTopicArn': {
+//               'Action': 'PUT',
+//               'Value': { 'S': topicArn }
+//             }
+//           }
+//         };
+//
+//         return rxDynamodb.rx_updateItem(params);
+//       });
+//   };
+//
+//   this.rx_deleteTopic = function () {
+//
+//     console.log('UserInfoRecord rx_deleteTopic');
+//
+//     var snsTopicArn = this.record.dynamodb.OldImage.snsTopicArn.S;
+//     return sns.rx_deleteTopicArn(snsTopicArn);
+//   };
+// };
+//
+//
+// exports.UserInfoRecord = UserInfoRecord;
 
 // ------------ UserInfoUpdater ------------
 
@@ -75,7 +75,7 @@ function UserInfoUpdater(reference) {
     console.log('UserInfoUpdater rx_increaseFollowCount');
     return this.rx_addNumberForKey(1, 'followingNumber')
   }
-  
+
   this.rx_decreaseFollowCount = function () {
     console.log('UserInfoUpdater rx_decreaseFollowCount');
     return this.rx_addNumberForKey(-1, 'followingNumber')

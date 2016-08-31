@@ -268,6 +268,7 @@ exports.deleteCommentEvent =
 }
 
 // ------------ Photo ------------
+
 exports.deletePhotoEvent =
 {
     "Records": [
