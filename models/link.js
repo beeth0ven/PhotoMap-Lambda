@@ -1,98 +1,89 @@
-// ------------ UserInfoRecord ------------
+// ------------ LinkRecord ------------
+
+exports.KindFollowUser = "0";
+exports.KindLikePhoto = "1";
+exports.KindCommentPhoto = "2";
 
 var RxAWS = require('../rxAWS/rxAWS.js');
-var dynamodb = new RxAWS.RxDynamoDB();
+var rxDynamodb = new RxAWS.RxDynamoDB();
+var UserInfo = require('./userInfo.js');
+var Photo = require('./photo.js');
 
 function LinkRecord(record) {
 
   this.record = record;
 
-  var newImage = this.record.dynamodb.NewImage
-  var oldImage = this.record.dynamodb.OldImage
+  this.getRecordImage = function () {
+    var newImage = this.record.dynamodb.NewImage
+    var oldImage = this.record.dynamodb.OldImage
+    return newImage != null ? newImage : oldImage
+  }
 
-  this.recordImage = newImage != null ? newImage : oldImage
+  this.getFromUserUpdater = function () {
+    var fromUserReference =  this.getRecordImage().fromUserReference.S
+    return new UserInfo.UserInfoUpdater(fromUserReference)
+  }
+
+  this.getToUserUpdater = function () {
+    var toUserReference =  this.getRecordImage().toUserReference.S
+    return new UserInfo.UserInfoUpdater(toUserReference)
+  }
+
+  this.getPhotoUpdater = function () {
+    var photoReference =  this.getRecordImage().itemReference.S
+    return new Photo.PhotoUpdater(photoReference)
+  }
 
   this.rx_increaseCommentCountToPhoto = function () {
-
     console.log('LinkRecord rx_increaseCommentCountToPhoto');
-
-    var attributes = {
-      'commentsNumber': {
-        'Action': 'ADD',
-        'Value': { 'N': '1' }
-      }
-    }
-
-    return this.rx_updatePhoto(attributes)
+    return this.getPhotoUpdater().rx_increaseCommentCount()
   }
 
   this.rx_decreaseCommentCountToPhoto = function () {
-
     console.log('LinkRecord rx_decreaseCommentCountToPhoto');
-
-    var attributes = {
-      'commentsNumber': {
-        'Action': 'ADD',
-        'Value': { 'N': '-1' }
-      }
-    }
-
-    return this.rx_updatePhoto(attributes)
+    return this.getPhotoUpdater().rx_decreaseCommentCount()
   }
 
-
-  this.rx_increaseLikeCountToPhoto = function () {
-
+  this.rx_increaseLikeCount = function () {
     console.log('LinkRecord rx_increaseLikeCountToPhoto');
-
-    var attributes = {
-      'likesNumber': {
-        'Action': 'ADD',
-        'Value': { 'N': '1' }
-      }
-    }
-
-    return this.rx_updatePhoto(attributes)
+    var photoUpdater = this.getPhotoUpdater()
+    var fromUserUpdater = this.getFromUserUpdater()
+    return photoUpdater.rx_increaseLikeCount()
+    .flatMap (function (data) {
+        return fromUserUpdater.rx_increaseLikedCount()
+    })
   }
 
-  this.rx_decreaseLikeCountToPhoto = function () {
-
+  this.rx_decreaseLikeCount = function () {
     console.log('LinkRecord rx_decreaseLikeCountToPhoto');
-
-    var attributes = {
-      'likesNumber': {
-        'Action': 'ADD',
-        'Value': { 'N': '-1' }
-      }
-    }
-
-    return this.rx_updatePhoto(attributes)
+    var photoUpdater = this.getPhotoUpdater()
+    var fromUserUpdater = this.getFromUserUpdater()
+    return photoUpdater.rx_decreaseLikeCount()
+    .flatMap (function (data) {
+        return fromUserUpdater.rx_decreaseLikedCount()
+    })
   }
 
-  this.rx_updatePhoto = function (attributes) {
-
-    console.log('LinkRecord rx_updatePhoto');
-
-    var keys = JSON.parse(this.recordImage.itemReference.S)
-    var params = {
-      'Key': {
-          "creationTime": {
-              "N": keys[1].toFixed(6)
-          },
-          "userReference": {
-              "S": keys[0]
-          }
-        },
-      'TableName': 'photomap-mobilehub-567053031-Photo',
-      'AttributeUpdates': attributes
-    };
-
-    return dynamodb.rx_updateItem(params);
+  this.rx_increaseFollowAndFollowerCount = function () {
+    console.log('LinkRecord rx_increaseFollowAndFollowerCount');
+    var fromUserUpdater = this.getFromUserUpdater()
+    var toUserUpdater = this.getToUserUpdater()
+    return fromUserUpdater.rx_increaseFollowCount()
+      .flatMap (function (data) {
+          return toUserUpdater.rx_increaseFollowerCount()
+      })
   }
+
+  this.rx_decreaseFollowAndFollowerCount = function () {
+    console.log('LinkRecord rx_decreaseFollowAndFollowerCount');
+    var fromUserUpdater = this.getFromUserUpdater()
+    var toUserUpdater = this.getToUserUpdater()
+    return fromUserUpdater.rx_decreaseFollowCount()
+    .flatMap (function (data) {
+        return toUserUpdater.rx_decreaseFollowerCount()
+    })
+  }
+
 };
 
 exports.LinkRecord = LinkRecord;
-
-exports.KindFollowUser = "0";
-exports.KindLikePhoto = "1";
-exports.KindCommentPhoto = "2";

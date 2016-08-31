@@ -1,6 +1,23 @@
 var Rx = require('rx');
 var AWS = require('aws-sdk');
-AWS.config.loadFromPath('config.json');
+// AWS.config.loadFromPath('config.json');
+
+// ------------ Context ------------
+
+exports.handleSucceed = function (message, context) {
+  console.log("Context Succeed:", message);
+  context.succeed("");
+}
+
+exports.handleError = function (error, context) {
+  console.log("Context error:", error);
+  context.fail(error);
+}
+
+exports.handleDone = function (context) {
+  console.log("Context done");
+  context.done();
+}
 
 // ------------ SNS ------------
 
@@ -105,10 +122,10 @@ function RxDynamoDB() {
 
       dynamodb.updateItem(params, function(error, data) {
         if (error) {
-          console.log('Did Fail to Update', tableName);
+          console.log('RxDynamoDB Did Fail to Update', tableName);
           observer.onError(error);
         } else {
-          console.log('Did Update', tableName);
+          console.log('RxDynamoDB Did Update', tableName);
           observer.onNext(data);
           observer.onCompleted();
         };
@@ -116,7 +133,6 @@ function RxDynamoDB() {
 
     });
   };
-
 }
 
 exports.RxDynamoDB = RxDynamoDB;
@@ -124,3 +140,22 @@ exports.RxDynamoDB = RxDynamoDB;
 exports.Insert = "INSERT";
 exports.Modify = "MODIFY";
 exports.Remove = "REMOVE";
+
+function RxDynamoDBUpdateParams(params) {
+
+  this.params = params
+
+  this.addNumberForKey = function (number, key) {
+    this.params.AttributeUpdates[key] = {
+      'Action': 'ADD',
+      'Value': { 'N': number.toString() }
+    }
+  }
+
+  this.rx_update = function () {
+    var rxDynamoDB = new RxDynamoDB()
+    return rxDynamoDB.rx_updateItem(this.params)
+  }
+}
+
+exports.RxDynamoDBUpdateParams = RxDynamoDBUpdateParams;

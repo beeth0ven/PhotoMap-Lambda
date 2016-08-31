@@ -5,44 +5,40 @@ var Photo = require('./models/photo.js');
 var Link = require('./models/link.js');
 var RxAWS = require('./rxAWS/rxAWS.js');
 
-const Insert = "INSERT";
-const Modify = "MODIFY";
-const Remove = "REMOVE";
-
-const LinkKindFollowUser = "0";
-const LinkKindLikePhoto = "1";
-const LinkKindCommentPhoto = "2";
-
 exports.handler = function(event, context) {
 
   console.log(JSON.stringify(event, null, 2));
 
-    event.Records.forEach(function(record) {
+  event.Records.forEach(function(record) {
 
-        switch (record.eventName) {
-          case Insert:
-          linkDidInsert(record, context);
-            break;
+      switch (record.eventName) {
+        case RxAWS.Insert:
+        linkDidInsert(record, context);
+          break;
 
-          case Remove:
-          linkDidDelete(record, context);
-            break;
+        case RxAWS.Remove:
+        linkDidDelete(record, context);
+          break;
 
-          default:
-          context.done();
-            break;
-        }
-    });
+        default:
+        context.done();
+          break;
+      }
+  });
 };
 
 function linkDidInsert(record, context) {
 
   switch (record.dynamodb.NewImage.kindRawValue.N) {
-    case LinkKindCommentPhoto:
+    case Link.KindFollowUser:
+    followUserLinkDidInsert(record, context)
+      break;
+
+    case Link.KindCommentPhoto:
     commentDidInsert(record, context)
       break;
 
-    case LinkKindLikePhoto:
+    case Link.KindLikePhoto:
     likePhotoLinkDidInsert(record, context)
         break;
 
@@ -55,13 +51,17 @@ function linkDidInsert(record, context) {
 function linkDidDelete(record, context) {
 
   switch (record.dynamodb.OldImage.kindRawValue.N) {
-    case LinkKindCommentPhoto:
+    case Link.KindFollowUser:
+    followUserLinkDidDelete(record, context)
+      break;
+
+    case Link.KindCommentPhoto:
     commentDidDelete(record, context)
       break;
 
-    case LinkKindLikePhoto:
+    case Link.KindLikePhoto:
     likePhotoLinkDidDelete(record, context)
-          break;
+      break;
 
     default:
     context.done();
@@ -75,7 +75,7 @@ function commentDidInsert(record, context) {
 
   linkRecord.rx_increaseCommentCountToPhoto()
     .subscribe(
-      function (x) { context.succeed("Succeed commentDidInsert."); },
+      function (x) { context.succeed("Index Succeed commentDidInsert."); },
       function (error) { context.fail(error); },
       function () { context.done(); }
     );
@@ -88,7 +88,7 @@ function commentDidDelete(record, context) {
 
   linkRecord.rx_decreaseCommentCountToPhoto()
     .subscribe(
-      function (x) { context.succeed("Succeed commentDidDelete."); },
+      function (x) { context.succeed("Index Succeed commentDidDelete."); },
       function (error) { context.fail(error); },
       function () { context.done(); }
     );
@@ -98,9 +98,9 @@ function likePhotoLinkDidInsert(record, context) {
 
   var linkRecord = new Link.LinkRecord(record);
 
-  linkRecord.rx_increaseLikeCountToPhoto()
+  linkRecord.rx_increaseLikeCount()
     .subscribe(
-      function (x) { context.succeed("Succeed likePhotoLinkDidInsert."); },
+      function (x) { context.succeed("Index Succeed likePhotoLinkDidInsert."); },
       function (error) { context.fail(error); },
       function () { context.done(); }
     );
@@ -110,9 +110,37 @@ function likePhotoLinkDidDelete(record, context) {
 
   var linkRecord = new Link.LinkRecord(record);
 
-  linkRecord.rx_decreaseLikeCountToPhoto()
+  linkRecord.rx_decreaseLikeCount()
     .subscribe(
-      function (x) { context.succeed("Succeed likePhotoLinkDidDelete."); },
+      function (x) { context.succeed("Index Succeed likePhotoLinkDidDelete."); },
+      function (error) { context.fail(error); },
+      function () { context.done(); }
+    );
+}
+
+function followUserLinkDidInsert(record, context) {
+
+  console.log('Index followUserLinkDidInsert');
+
+  var linkRecord = new Link.LinkRecord(record);
+
+  linkRecord.rx_increaseFollowAndFollowerCount()
+    .subscribe(
+      function (x) { context.succeed("Index Succeed followUserLinkDidInsert."); },
+      function (error) { context.fail(error); },
+      function () { context.done(); }
+    );
+}
+
+function followUserLinkDidDelete(record, context) {
+
+  console.log('Index followUserLinkDidDelete');
+
+  var linkRecord = new Link.LinkRecord(record);
+
+  linkRecord.rx_decreaseFollowAndFollowerCount()
+    .subscribe(
+      function (x) { context.succeed("Index Succeed followUserLinkDidDelete."); },
       function (error) { context.fail(error); },
       function () { context.done(); }
     );
