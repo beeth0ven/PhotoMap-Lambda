@@ -1,6 +1,6 @@
 var Rx = require('rx');
 var AWS = require('aws-sdk');
-AWS.config.loadFromPath('config.json');
+// AWS.config.loadFromPath('config.json');
 
 // ------------ Context ------------
 

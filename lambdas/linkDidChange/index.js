@@ -11,94 +11,94 @@ var Link = require('./models/link.js');
 exports.handler = function(event, context) {
 
   console.log(JSON.stringify(event, null, 2));
+  var rx_records = event.Records.map (function (record) {
+      return rx_recordDidChange(record)
+        .catch(function (error) { return Rx.Observable.just(error) })
+  })
 
-  event.Records.forEach(function(record) {
-
-      switch (record.eventName) {
-        case RxAWS.Insert:
-        linkDidInsert(record, context);
-          break;
-
-        case RxAWS.Remove:
-        linkDidDelete(record, context);
-          break;
-
-        default:
-        context.done();
-          break;
-      }
-  });
+  Rx.Observable.combineLatest(rx_records)
+    .subscribe(
+      function (x)      { RxAWS.handleSucceed(x, context)  },
+      function (error)  { RxAWS.handleError(error, context) },
+      function ()       { RxAWS.handleDone(context) }
+    );
 };
 
-function linkDidInsert(record, context) {
+function rx_recordDidChange(record) {
+  switch (record.eventName) {
+    case RxAWS.Insert:
+    return rx_linkDidInsert(record)
+      break;
+
+    case RxAWS.Remove:
+    return rx_linkDidDelete(record)
+      break;
+
+    default:
+    return Rx.Observable.just({});
+      break;
+  }
+}
+
+function rx_linkDidInsert(record) {
 
   switch (record.dynamodb.NewImage.kindRawValue.N) {
     case Link.KindFollowUser:
-    followUserLinkDidInsert(record, context)
+    return rx_followUserLinkDidInsert(record)
       break;
 
     case Link.KindCommentPhoto:
-    commentDidInsert(record, context)
+    return rx_commentDidInsert(record)
       break;
 
     case Link.KindLikePhoto:
-    likePhotoLinkDidInsert(record, context)
+    return rx_likePhotoLinkDidInsert(record)
         break;
 
     default:
-    context.done();
+    return Rx.Observable.just({});
       break;
   };
 };
 
-function linkDidDelete(record, context) {
+function rx_linkDidDelete(record) {
 
   switch (record.dynamodb.OldImage.kindRawValue.N) {
     case Link.KindFollowUser:
-    followUserLinkDidDelete(record, context)
+    return rx_followUserLinkDidDelete(record)
       break;
 
     case Link.KindCommentPhoto:
-    commentDidDelete(record, context)
+    return rx_commentDidDelete(record)
       break;
 
     case Link.KindLikePhoto:
-    likePhotoLinkDidDelete(record, context)
+    return rx_likePhotoLinkDidDelete(record)
       break;
 
     default:
-    context.done();
+    return Rx.Observable.just({});
       break;
   };
 };
 
-function commentDidInsert(record, context) {
+function rx_commentDidInsert(record) {
   console.log('Index commentDidInsert');
   var photoUpdater = new Photo.PhotoUpdater(record.dynamodb.NewImage.itemReference.S)
-  photoUpdater.rx_increaseCommentCount()
-    .subscribe(
-      function (x)      { RxAWS.handleSucceed("commentDidInsert", context)  },
-      function (error)  { RxAWS.handleError(error, context) },
-      function ()       { RxAWS.handleDone(context) }
-    );
+  return photoUpdater.rx_increaseCommentCount()
 }
 
-function commentDidDelete(record, context) {
+function rx_commentDidDelete(record) {
   console.log('Index commentDidDelete');
   var photoUpdater = new Photo.PhotoUpdater(record.dynamodb.OldImage.itemReference.S)
-  photoUpdater.rx_decreaseCommentCount()
-    .subscribe(
-      function (x)      { RxAWS.handleSucceed("commentDidDelete", context)  },
-      function (error)  { RxAWS.handleError(error, context) },
-      function ()       { RxAWS.handleDone(context) }
-    );
+  return photoUpdater.rx_decreaseCommentCount()
 }
 
-function likePhotoLinkDidInsert(record, context) {
+function rx_likePhotoLinkDidInsert(record) {
   console.log('Index likePhotoLinkDidInsert');
   var photoUpdater = new Photo.PhotoUpdater(record.dynamodb.NewImage.itemReference.S)
   var fromUserUpdater = new UserInfo.UserInfoUpdater(record.dynamodb.NewImage.fromUserReference.S)
-  photoUpdater.rx_increaseLikedCount()
+  return photoUpdater.rx_increaseLikedCount()
     .flatMap (function (data) { return fromUserUpdater.rx_increaseLikedCount() })
     .flatMap (function (data) {
       var rx_toUserInfo = UserInfo.rx_getFromReference(record.dynamodb.NewImage.toUserReference.S)
@@ -115,54 +115,34 @@ function likePhotoLinkDidInsert(record, context) {
     .flatMap (function (data) {
       return rxSNS.rx_publishToTopicArn(data[0], data[1])
     })
-    .subscribe(
-      function (x)      { RxAWS.handleSucceed("likePhotoLinkDidInsert", context)  },
-      function (error)  { RxAWS.handleError(error, context) },
-      function ()       { RxAWS.handleDone(context) }
-    );
 }
 
-function likePhotoLinkDidDelete(record, context) {
+function rx_likePhotoLinkDidDelete(record) {
   console.log('Index likePhotoLinkDidDelete');
   var photoUpdater = new Photo.PhotoUpdater(record.dynamodb.OldImage.itemReference.S)
   var fromUserUpdater = new UserInfo.UserInfoUpdater(record.dynamodb.OldImage.fromUserReference.S)
-  photoUpdater.rx_decreaseLikedCount()
+  return photoUpdater.rx_decreaseLikedCount()
     .flatMap (function (data) {
         return fromUserUpdater.rx_decreaseLikedCount()
     })
-    .subscribe(
-      function (x)      { RxAWS.handleSucceed("likePhotoLinkDidDelete", context)  },
-      function (error)  { RxAWS.handleError(error, context) },
-      function ()       { RxAWS.handleDone(context) }
-    );
 }
 
-function followUserLinkDidInsert(record, context) {
+function rx_followUserLinkDidInsert(record) {
   console.log('Index followUserLinkDidInsert');
   var fromUserUpdater = new UserInfo.UserInfoUpdater(record.dynamodb.NewImage.fromUserReference.S)
   var toUserUpdater = new UserInfo.UserInfoUpdater(record.dynamodb.NewImage.toUserReference.S)
-  fromUserUpdater.rx_increaseFollowCount()
+  return fromUserUpdater.rx_increaseFollowCount()
     .flatMap (function (data) {
         return toUserUpdater.rx_increaseFollowerCount()
     })
-    .subscribe(
-      function (x)      { RxAWS.handleSucceed("followUserLinkDidInsert", context)  },
-      function (error)  { RxAWS.handleError(error, context) },
-      function ()       { RxAWS.handleDone(context) }
-    );
 }
 
-function followUserLinkDidDelete(record, context) {
+function rx_followUserLinkDidDelete(record) {
   console.log('Index followUserLinkDidDelete');
   var fromUserUpdater = new UserInfo.UserInfoUpdater(record.dynamodb.OldImage.fromUserReference.S)
   var toUserUpdater = new UserInfo.UserInfoUpdater(record.dynamodb.OldImage.toUserReference.S)
-  fromUserUpdater.rx_decreaseFollowCount()
+  return fromUserUpdater.rx_decreaseFollowCount()
     .flatMap (function (data) {
         return toUserUpdater.rx_decreaseFollowerCount()
     })
-    .subscribe(
-      function (x)      { RxAWS.handleSucceed("followUserLinkDidDelete", context)  },
-      function (error)  { RxAWS.handleError(error, context) },
-      function ()       { RxAWS.handleDone(context) }
-    );
 }
