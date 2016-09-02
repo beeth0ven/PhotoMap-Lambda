@@ -1,49 +1,55 @@
-// ------------ UserInfoRecord ------------
+// ------------ UserInfo ------------
 
 var RxAWS = require('../rxAWS/rxAWS.js');
-var sns = new RxAWS.RxSNS();
+var rxSNS = new RxAWS.RxSNS();
 var rxDynamodb = new RxAWS.RxDynamoDB();
 
-// function UserInfoRecord(record) {
-//
-//   this.record = record;
-//
-//   this.rx_createTopic = function () {
-//
-//     console.log('UserInfoRecord rx_createTopic');
-//
-//     var userId = this.record.dynamodb.Keys.userId.S;
-//     var trimedUserId = userId.replace(":", "-");
-//     return sns.rx_createTopic(trimedUserId)
-//       .map(function (data) { return data.TopicArn })
-//       .flatMap(function (topicArn) {
-//
-//         var params = {
-//           'Key': record.dynamodb.Keys,
-//           'TableName': 'photomap-mobilehub-567053031-UserInfo',
-//           'AttributeUpdates': {
-//             'snsTopicArn': {
-//               'Action': 'PUT',
-//               'Value': { 'S': topicArn }
-//             }
-//           }
-//         };
-//
-//         return rxDynamodb.rx_updateItem(params);
-//       });
-//   };
-//
-//   this.rx_deleteTopic = function () {
-//
-//     console.log('UserInfoRecord rx_deleteTopic');
-//
-//     var snsTopicArn = this.record.dynamodb.OldImage.snsTopicArn.S;
-//     return sns.rx_deleteTopicArn(snsTopicArn);
-//   };
-// };
-//
-//
-// exports.UserInfoRecord = UserInfoRecord;
+const TableName = 'photomap-mobilehub-567053031-UserInfo';
+
+function getParams(reference) {
+  var keys = JSON.parse(reference)
+  return {
+    'Key': RxAWS.getAttributeParamsFrom({
+              'userId': keys[0],
+              'creationTime': keys[1]
+           }),
+    'TableName': TableName
+  }
+}
+
+function rx_getFromReference(reference) {
+  var params = getParams(reference)
+  return rxDynamodb.rx_getItem(params)
+}
+
+exports.rx_getFromReference = rx_getFromReference;
+
+// ------------ UserInfoRecord ------------
+
+function UserInfoRecord(record) {
+
+  this.record = record
+
+  this.rx_createTopic = function () {
+    console.log('UserInfoRecord rx_createTopic');
+    var userId = this.record.dynamodb.Keys.userId.S; var creationTime = Number(this.record.dynamodb.Keys.creationTime.N)
+    var reference = JSON.stringify([userId, creationTime]); var userUpdater = new UserInfoUpdater(reference)
+    var topicName = userId.replace(":", "-");
+    return rxSNS.rx_createTopic(topicName)
+      .map(function (data) { return data.TopicArn })
+      .flatMap(function (topicArn) {
+        return userUpdater.rx_setSnsTopicArn(topicArn)
+      })
+  };
+
+  this.rx_deleteTopic = function () {
+    console.log('UserInfoRecord rx_deleteTopic');
+    var snsTopicArn = this.record.dynamodb.OldImage.snsTopicArn.S;
+    return rxSNS.rx_deleteTopicArn(snsTopicArn);
+  };
+};
+
+exports.UserInfoRecord = UserInfoRecord;
 
 // ------------ UserInfoUpdater ------------
 
@@ -51,24 +57,10 @@ function UserInfoUpdater(reference) {
 
   this.reference = reference;
 
-  this.getUpdateParams = function () {
-
-    var keys = JSON.parse(reference)
-
-    var params = {
-      'Key': {
-          "creationTime": {
-              "N": keys[1].toFixed(6)
-          },
-          "userId": {
-              "S": keys[0]
-          }
-        },
-      'TableName': 'photomap-mobilehub-567053031-UserInfo',
-      'AttributeUpdates': {}
-    };
-
-    return new RxAWS.RxDynamoDBUpdateParams(params);
+  this.rx_setSnsTopicArn = function (topicArn) {
+    var params = getParams(reference)
+    params.AttributeUpdates = RxAWS.getPutParamsFrom({ 'snsTopicArn': topicArn })
+    return rxDynamodb.rx_updateItem(params)
   }
 
   this.rx_increaseFollowCount = function () {
@@ -112,9 +104,9 @@ function UserInfoUpdater(reference) {
   }
 
   this.rx_addNumberForKey = function (number, key) {
-    var updateParams = this.getUpdateParams()
-    updateParams.addNumberForKey(number, key)
-    return updateParams.rx_update()
+    var params = getParams(reference)
+    params.AttributeUpdates = RxAWS.getAddParamsFrom({ [key]: number })
+    return rxDynamodb.rx_updateItem(params)
   }
 }
 

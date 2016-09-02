@@ -1,6 +1,322 @@
-// ------------ Link ------------
+exports.photoDidInserts =
+{
+    "Records": [
+        {
+            "eventID": "7323488eaf0aa54a647ace83c2be4aa1",
+            "eventName": "REMOVE",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "us-east-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1471330560,
+                "Keys": {
+                    "creationTime": {
+                        "N": "1471330612.177063"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    }
+                },
+                "OldImage": {
+                    "commentsNumber": {
+                        "N": "0"
+                    },
+                    "likesNumber": {
+                        "N": "0"
+                    },
+                    "creationTime": {
+                        "N": "1471330612.177063"
+                    },
+                    "thumbnailImageS3Key": {
+                        "S": "public/1471330608.41104.png"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    },
+                    "title": {
+                        "S": "11"
+                    },
+                    "imageS3Key": {
+                        "S": "public/1471330608.40248.png"
+                    }
+                },
+                "SequenceNumber": "8882400000000006748173951",
+                "SizeBytes": 319,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:649756765455:table/photomap-mobilehub-567053031-Photo/stream/2016-08-16T06:54:23.305"
+        },
+        {
+            "eventID": "7323488eaf0aa54a647ace83c2be4aa1",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "us-east-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1471330560,
+                "Keys": {
+                    "creationTime": {
+                        "N": "1471330612.177063"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    }
+                },
+                "NewImage": {
+                    "commentsNumber": {
+                        "N": "0"
+                    },
+                    "likesNumber": {
+                        "N": "0"
+                    },
+                    "creationTime": {
+                        "N": "1471330612.177063"
+                    },
+                    "thumbnailImageS3Key": {
+                        "S": "public/1471330608.41104.png"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    },
+                    "title": {
+                        "S": "11"
+                    },
+                    "imageS3Key": {
+                        "S": "public/1471330608.40248.png"
+                    }
+                },
+                "SequenceNumber": "8882400000000006748173951",
+                "SizeBytes": 319,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:649756765455:table/photomap-mobilehub-567053031-Photo/stream/2016-08-16T06:54:23.305"
+        },
+        {
+            "eventID": "7323488eaf0aa54a647ace83c2be4aa1",
+            "eventName": "MODIFY",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "us-east-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1471330560,
+                "Keys": {
+                    "creationTime": {
+                        "N": "1471330612.177063"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    }
+                },
+                "NewImage": {
+                    "commentsNumber": {
+                        "N": "0"
+                    },
+                    "likesNumber": {
+                        "N": "0"
+                    },
+                    "creationTime": {
+                        "N": "1471330612.177063"
+                    },
+                    "thumbnailImageS3Key": {
+                        "S": "public/1471330608.41104.png"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    },
+                    "title": {
+                        "S": "11"
+                    },
+                    "imageS3Key": {
+                        "S": "public/1471330608.40248.png"
+                    }
+                },
+                "SequenceNumber": "8882400000000006748173951",
+                "SizeBytes": 319,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:649756765455:table/photomap-mobilehub-567053031-Photo/stream/2016-08-16T06:54:23.305"
+        },
+        {
+            "eventID": "7323488eaf0aa54a647ace83c2be4aa1",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "us-east-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1471330560,
+                "Keys": {
+                    "creationTime": {
+                        "N": "1471330612.177063"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    }
+                },
+                "NewImage": {
+                    "commentsNumber": {
+                        "N": "0"
+                    },
+                    "likesNumber": {
+                        "N": "0"
+                    },
+                    "creationTime": {
+                        "N": "1471330612.177063"
+                    },
+                    "thumbnailImageS3Key": {
+                        "S": "public/1471330608.41104.png"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    },
+                    "title": {
+                        "S": "11"
+                    },
+                    "imageS3Key": {
+                        "S": "public/1471330608.40248.png"
+                    }
+                },
+                "SequenceNumber": "8882400000000006748173951",
+                "SizeBytes": 319,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:649756765455:table/photomap-mobilehub-567053031-Photo/stream/2016-08-16T06:54:23.305"
+        },
+        {
+            "eventID": "7323488eaf0aa54a647ace83c2be4aa1",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "us-east-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1471330560,
+                "Keys": {
+                    "creationTime": {
+                        "N": "1471330612.177063"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    }
+                },
+                "NewImage": {
+                    "commentsNumber": {
+                        "N": "0"
+                    },
+                    "likesNumber": {
+                        "N": "0"
+                    },
+                    "creationTime": {
+                        "N": "1471330612.177063"
+                    },
+                    "thumbnailImageS3Key": {
+                        "S": "public/1471330608.41104.png"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    },
+                    "title": {
+                        "S": "11"
+                    },
+                    "imageS3Key": {
+                        "S": "public/1471330608.40248.png"
+                    }
+                },
+                "SequenceNumber": "8882400000000006748173951",
+                "SizeBytes": 319,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:649756765455:table/photomap-mobilehub-567053031-Photo/stream/2016-08-16T06:54:23.305"
+        },
+        {
+            "eventID": "7323488eaf0aa54a647ace83c2be4aa1",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "us-east-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1471330560,
+                "Keys": {
+                    "creationTime": {
+                        "N": "1471330612.177063"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    }
+                },
+                "NewImage": {
+                    "commentsNumber": {
+                        "N": "0"
+                    },
+                    "likesNumber": {
+                        "N": "0"
+                    },
+                    "creationTime": {
+                        "N": "1471330612.177063"
+                    },
+                    "thumbnailImageS3Key": {
+                        "S": "public/1471330608.41104.png"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    },
+                    "title": {
+                        "S": "11"
+                    },
+                    "imageS3Key": {
+                        "S": "public/1471330608.40248.png"
+                    }
+                },
+                "SequenceNumber": "8882400000000006748173951",
+                "SizeBytes": 319,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:649756765455:table/photomap-mobilehub-567053031-Photo/stream/2016-08-16T06:54:23.305"
+        }
+    ]
+};
 
-exports.deleteFollowUserEvent =
+exports.followUserLinkDidInsert =
+{
+    "Records": [
+        {
+            "eventID": "e9d106636a76c68fa85c04021c58d803",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "us-east-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1472608380,
+                "Keys": {
+                    "creationTime": {
+                        "N": "1472542500.319333"
+                    },
+                    "fromUserReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    }
+                },
+                "NewImage": {
+                    "kindRawValue": {
+                        "N": "0"
+                    },
+                    "creationTime": {
+                        "N": "1472542500.319333"
+                    },
+                    "toUserReference": {
+                        "S": "[\"us-east-1:7982e028-e401-4dff-966b-af81de9fdb88\",1471233567.026141]"
+                    },
+                    "fromUserReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    }
+                },
+                "SequenceNumber": "74920600000000008690792043",
+                "SizeBytes": 306,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:649756765455:table/photomap-mobilehub-567053031-Link/stream/2016-08-24T07:23:34.336"
+        }
+    ]
+}
+
+exports.followUserLinkDidDelete =
 {
     "Records": [
         {
@@ -42,49 +358,7 @@ exports.deleteFollowUserEvent =
     ]
 }
 
-exports.insertFollowUserEvent =
-{
-    "Records": [
-        {
-            "eventID": "f9bed1bfdcdf41c6a8f00a4fba1af473",
-            "eventName": "INSERT",
-            "eventVersion": "1.1",
-            "eventSource": "aws:dynamodb",
-            "awsRegion": "us-east-1",
-            "dynamodb": {
-                "ApproximateCreationDateTime": 1472541900,
-                "Keys": {
-                    "creationTime": {
-                        "N": "1472541916.096104"
-                    },
-                    "fromUserReference": {
-                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
-                    }
-                },
-                "NewImage": {
-                    "kindRawValue": {
-                        "N": "0"
-                    },
-                    "creationTime": {
-                        "N": "1472541916.096104"
-                    },
-                    "toUserReference": {
-                        "S": "[\"us-east-1:7982e028-e401-4dff-966b-af81de9fdb88\",1471233567.026141]"
-                    },
-                    "fromUserReference": {
-                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
-                    }
-                },
-                "SequenceNumber": "71742100000000008596490970",
-                "SizeBytes": 306,
-                "StreamViewType": "NEW_AND_OLD_IMAGES"
-            },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:649756765455:table/photomap-mobilehub-567053031-Link/stream/2016-08-24T07:23:34.336"
-        }
-    ]
-}
-
-exports.insertLikePhotoEvent =
+exports.likePhotoLinkDidInsert =
 {
     "Records": [{
         "eventID": "83f365a3d2d26bfce9f480f78edc34b9",
@@ -128,7 +402,7 @@ exports.insertLikePhotoEvent =
 }
 
 
-exports.deleteLikePhotoEvent =
+exports.likePhotoLinkDidDelete =
 {
     "Records": [{
         "eventID": "5794571e3a9da010cce7b1630febe311",
@@ -171,7 +445,7 @@ exports.deleteLikePhotoEvent =
     }]
 }
 
-exports.insertCommentEvent =
+exports.commentDidInsert =
 {
     "Records": [
         {
@@ -219,7 +493,7 @@ exports.insertCommentEvent =
     ]
 }
 
-exports.deleteCommentEvent =
+exports.commentDidDelete =
 {
     "Records": [
         {
@@ -269,58 +543,7 @@ exports.deleteCommentEvent =
 
 // ------------ Photo ------------
 
-exports.deletePhotoEvent =
-{
-    "Records": [
-        {
-            "eventID": "eb195c50ccb32773e546e44ebc428f98",
-            "eventName": "REMOVE",
-            "eventVersion": "1.1",
-            "eventSource": "aws:dynamodb",
-            "awsRegion": "us-east-1",
-            "dynamodb": {
-                "ApproximateCreationDateTime": 1472625180,
-                "Keys": {
-                    "creationTime": {
-                        "N": "1471238431.666237"
-                    },
-                    "userReference": {
-                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
-                    }
-                },
-                "OldImage": {
-                    "commentsNumber": {
-                        "N": "6"
-                    },
-                    "likesNumber": {
-                        "N": "2"
-                    },
-                    "creationTime": {
-                        "N": "1471238431.666237"
-                    },
-                    "thumbnailImageS3Key": {
-                        "S": "public/1471238411.21948.png"
-                    },
-                    "userReference": {
-                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
-                    },
-                    "title": {
-                        "S": "test"
-                    },
-                    "imageS3Key": {
-                        "S": "public/1471238411.21838.png"
-                    }
-                },
-                "SequenceNumber": "76360600000000007123315865",
-                "SizeBytes": 323,
-                "StreamViewType": "NEW_AND_OLD_IMAGES"
-            },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:649756765455:table/photomap-mobilehub-567053031-Photo/stream/2016-08-31T06:30:12.930"
-        }
-    ]
-}
-
-exports.insertPhotoEvent =
+exports.photoDidInsert =
 {
     "Records": [
         {
@@ -371,9 +594,60 @@ exports.insertPhotoEvent =
     ]
 };
 
+exports.photoDidDelete =
+{
+    "Records": [
+        {
+            "eventID": "eb195c50ccb32773e546e44ebc428f98",
+            "eventName": "REMOVE",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "us-east-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1472625180,
+                "Keys": {
+                    "creationTime": {
+                        "N": "1471238431.666237"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    }
+                },
+                "OldImage": {
+                    "commentsNumber": {
+                        "N": "6"
+                    },
+                    "likesNumber": {
+                        "N": "2"
+                    },
+                    "creationTime": {
+                        "N": "1471238431.666237"
+                    },
+                    "thumbnailImageS3Key": {
+                        "S": "public/1471238411.21948.png"
+                    },
+                    "userReference": {
+                        "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
+                    },
+                    "title": {
+                        "S": "test"
+                    },
+                    "imageS3Key": {
+                        "S": "public/1471238411.21838.png"
+                    }
+                },
+                "SequenceNumber": "76360600000000007123315865",
+                "SizeBytes": 323,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:649756765455:table/photomap-mobilehub-567053031-Photo/stream/2016-08-31T06:30:12.930"
+        }
+    ]
+}
+
 // ------------ UserInfo ------------
 
-exports.insertUserInfoEvent = {
+exports.userInfoDidInsert = {
     "Records": [
         {
             "eventID": "7f90e65c29caa4fc62a94075c6f847c6",

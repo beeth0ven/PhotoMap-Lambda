@@ -1,35 +1,40 @@
-// ------------ PhotoUpdater ------------
+// ------------ Photo ------------------------
 
 var RxAWS = require('../rxAWS/rxAWS.js');
+var rxDynamodb = new RxAWS.RxDynamoDB();
+
+const TableName = 'photomap-mobilehub-567053031-Photo';
+
+function getParams(reference) {
+  var keys = JSON.parse(reference)
+  return {
+    'Key': RxAWS.getAttributeParamsFrom({
+              'userReference': keys[0],
+              'creationTime': keys[1]
+           }),
+    'TableName': TableName
+  }
+}
+
+function rx_getFromReference(reference) {
+  var params = getParams(reference)
+  return rxDynamodb.rx_getItem(params)
+}
+
+exports.rx_getFromReference = rx_getFromReference;
+
+// ------------ PhotoUpdater
 
 function PhotoUpdater(reference) {
 
   this.reference = reference;
 
-  this.getUpdateParams = function () {
-
-    var keys = JSON.parse(reference)
-    var params = {
-      'Key': {
-          "creationTime": {
-              "N": keys[1].toFixed(6)
-          },
-          "userReference": {
-              "S": keys[0]
-          }
-        },
-      'TableName': 'photomap-mobilehub-567053031-Photo',
-      'AttributeUpdates': {}
-    }
-    return new RxAWS.RxDynamoDBUpdateParams(params);
-  }
-
-  this.rx_increaseLikeCount = function () {
+  this.rx_increaseLikedCount = function () {
     console.log('PhotoUpdater rx_increaseLikeCount');
     return this.rx_addNumberForKey(1, 'likesNumber')
   }
 
-  this.rx_decreaseLikeCount = function () {
+  this.rx_decreaseLikedCount = function () {
     console.log('PhotoUpdater rx_decreaseLikeCount');
     return this.rx_addNumberForKey(-1, 'likesNumber')
   }
@@ -45,10 +50,12 @@ function PhotoUpdater(reference) {
   }
 
   this.rx_addNumberForKey = function (number, key) {
-      var updateParams = this.getUpdateParams()
-      updateParams.addNumberForKey(number, key)
-      return updateParams.rx_update()
-    }
+    var params = getParams(reference)
+    params.AttributeUpdates = RxAWS.getAddParamsFrom({ [key]: number })
+    // console.log('rx_addNumberForKey', params);
+    console.log('AttributeUpdates', params.AttributeUpdates);
+    return rxDynamodb.rx_updateItem(params)
+  }
 }
 
 exports.PhotoUpdater = PhotoUpdater;

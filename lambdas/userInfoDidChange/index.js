@@ -1,55 +1,49 @@
+// ------------ UserInfoDidChange ------------
+
 var Rx = require('rx');
-
-var UserInfo = require('./models/userInfo.js');
-var Photo = require('./models/photo.js');
 var RxAWS = require('./rxAWS/rxAWS.js');
-
-const Insert = "INSERT";
-const Modify = "MODIFY";
-const Remove = "REMOVE";
+var UserInfo = require('./models/userInfo.js');
 
 exports.handler = function(event, context) {
 
-    event.Records.forEach(function(record) {
+  console.log(JSON.stringify(event, null, 2));
+  var rx_records = event.Records.map (function (record) {
+      return rx_recordDidChange(record)
+        .catch(function (error) { return Rx.Observable.just(error) })
+  })
 
-      console.log(JSON.stringify(record, null, 2));
-
-        switch (record.eventName) {
-          case Insert:
-          userInfoDidInsert(record, context);
-            break;
-
-          case Remove:
-          userInfoDidDelete(record, context);
-            break;
-
-          default:
-          context.done();
-            break;
-        }
-    });
-};
-
-function userInfoDidInsert(record, context) {
-
-  var userInfoRecord = new UserInfo.UserInfoRecord(record);
-
-  userInfoRecord.rx_createTopic()
+  Rx.Observable.combineLatest(rx_records)
     .subscribe(
-      function (x) { context.succeed("Succeed userInfoDidInsert."); },
-      function (error) { context.fail(error); },
-      function () { context.done(); }
+      function (x)      { RxAWS.handleSucceed(x, context)  },
+      function (error)  { RxAWS.handleError(error, context) },
+      function ()       { RxAWS.handleDone(context) }
     );
 };
 
-function userInfoDidDelete(record, context) {
+function rx_recordDidChange(record) {
+  switch (record.eventName) {
+    case RxAWS.Insert:
+    return rx_userInfoDidInsert(record);
+      break;
 
+    case RxAWS.Remove:
+    return rx_userInfoDidDelete(record);
+      break;
+
+    default:
+    return Rx.Observable.just({});
+      break;
+  }
+}
+
+function rx_userInfoDidInsert(record) {
+  console.log('Index userInfoDidInsert');
   var userInfoRecord = new UserInfo.UserInfoRecord(record);
+  return userInfoRecord.rx_createTopic()
+};
 
-  userInfoRecord.rx_deleteTopic()
-    .subscribe(
-      function (x) { context.succeed("Succeed userInfoDidDelete."); },
-      function (error) { context.fail(error); },
-      function () { context.done(); }
-    );
+function rx_userInfoDidDelete(record) {
+  console.log('Index userInfoDidDelete');
+  var userInfoRecord = new UserInfo.UserInfoRecord(record);
+  return userInfoRecord.rx_deleteTopic()
 };

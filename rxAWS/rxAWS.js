@@ -4,14 +4,13 @@ AWS.config.loadFromPath('config.json');
 
 // ------------ Context ------------
 
-exports.handleSucceed = function (message, context) {
-  console.log("Context Succeed:", message);
-  context.succeed("");
+exports.handleSucceed = function (x, context) {
+  console.log("Context Succeed:", x);
 }
 
 exports.handleError = function (error, context) {
   console.log("Context error:", error);
-  context.fail(error);
+  context.fail(error)
 }
 
 exports.handleDone = function (context) {
@@ -69,43 +68,50 @@ function RxSNS() {
     });
   };
 
-};
+  this.rx_publishToTopicArn = function (message, topicArn) {
+
+    return Rx.Observable.create(function(observer) {
+
+      var payload = {
+        'default': 'title',
+        'APNS': {
+          'aps': {
+            'alert': '',
+            'sound': 'default',
+            'badge': 1
+          }
+        }
+      };
+
+      payload.APNS.aps.alert = message
+      // first have to stringify the inner APNS object...
+      payload.APNS = JSON.stringify(payload.APNS)
+      // then have to stringify the entire message payload
+      payload = JSON.stringify(payload)
+
+      console.log('RxSNS Publishing to', topicArn);
+
+      sns.publish({
+        Message: payload,
+        MessageStructure: 'json',
+        TopicArn: topicArn
+      }, function(error, data) {
+        if (error) {
+          console.log('RxSNS Did Fail to Publish to', topicArn);
+          observer.onError(error);
+        } else {
+          console.log('RxSNS Did Publish to', topicArn);
+          observer.onNext(data);
+          observer.onCompleted();
+        }
+      })
+
+
+    })
+  }
+}
 
 exports.RxSNS = RxSNS;
-
-// var endpointArn = "arn:aws:sns:us-east-1:649756765455:endpoint/APNS/photomap_MOBILEHUB_567053031/b52353d5-dc2e-3695-a414-1c9195628b7c";
-//
-// var payload = {
-//   default: 'Hello World',
-//   APNS: {
-//     aps: {
-//       alert: 'Hello World',
-//       sound: 'default',
-//       badge: 1
-//     }
-//   }
-// };
-//
-// // first have to stringify the inner APNS object...
-// payload.APNS = JSON.stringify(payload.APNS);
-// // then have to stringify the entire message payload
-// payload = JSON.stringify(payload);
-//
-// console.log('sending push');
-// sns.publish({
-//   Message: payload,
-//   MessageStructure: 'json',
-//   TargetArn: endpointArn
-// }, function(err, data) {
-//   if (err) {
-//     console.log(err.stack);
-//     return;
-//   }
-//
-//   console.log('push sent');
-//   console.log(data);
-// });
-
 
 // ------------ DynamoDB ------------
 
@@ -116,9 +122,9 @@ function RxDynamoDB() {
   this.rx_updateItem = function (params) {
 
     return Rx.Observable.create(function(observer) {
-
-      console.log('RxDynamoDB Updating item.');
       var tableName = params.TableName
+
+      console.log('RxDynamoDB Updating', tableName);
 
       dynamodb.updateItem(params, function(error, data) {
         if (error) {
@@ -132,7 +138,30 @@ function RxDynamoDB() {
       });
 
     });
-  };
+  }
+
+  this.rx_getItem = function (params) {
+
+    return Rx.Observable.create(function(observer) {
+
+      var tableName = params.TableName
+
+      console.log('RxDynamoDB Getting', tableName);
+
+      dynamodb.getItem(params, function(error, data) {
+        if (error) {
+          console.log('RxDynamoDB Did Fail to Get', tableName);
+          observer.onError(error);
+        } else {
+          console.log('RxDynamoDB Did Get', tableName);
+          observer.onNext(data);
+          observer.onCompleted();
+        };
+      });
+
+    })
+    .map(function (data) { return data.Item })
+  }
 }
 
 exports.RxDynamoDB = RxDynamoDB;
@@ -141,22 +170,70 @@ exports.Insert = "INSERT";
 exports.Modify = "MODIFY";
 exports.Remove = "REMOVE";
 
-function RxDynamoDBUpdateParams(params) {
-
-  this.params = params
-
-  this.addNumberForKey = function (number, key) {
-    this.params.AttributeUpdates[key] = {
-      'Action': 'ADD',
-      'Value': { 'N': number.toString() }
-    }
-    return this
-  }
-
-  this.rx_update = function () {
-    var rxDynamoDB = new RxDynamoDB()
-    return rxDynamoDB.rx_updateItem(this.params)
-  }
+function getAddParamsFrom(params) {
+  return getUpdateParamsForActionFromParams('ADD', params)
 }
 
-exports.RxDynamoDBUpdateParams = RxDynamoDBUpdateParams;
+function getPutParamsFrom(params) {
+  return getUpdateParamsForActionFromParams('PUT', params)
+}
+
+function getUpdateParamsForActionFromParams(action ,params) {
+  for (var key in params) {
+    var value = params[key]
+    var valueType = typeof value
+    switch (valueType) {
+      case 'number':
+        params[key] = {
+          'Action': action,
+          'Value': { 'N': value.toString() }
+        }
+        break;
+
+      case 'string':
+        params[key] = {
+          'Action': action,
+          'Value': { 'S': value }
+        }
+        break;
+
+      default:
+        console.log('Can not getAddAttributeParamsFrom:', value);
+        console.log('Of type:', valueType);
+        break;
+    }
+  }
+  return params
+}
+
+exports.getAddParamsFrom = getAddParamsFrom;
+exports.getPutParamsFrom = getPutParamsFrom;
+
+function getAttributeParamsFrom(params) {
+
+  for (var key in params) {
+    var value = params[key]
+    var valueType = typeof value
+    switch (valueType) {
+      case 'number':
+        params[key] = {
+          'N': value.toString()
+        }
+        break;
+      case 'string':
+        params[key] = {
+          'S': value
+        }
+        break;
+
+      default:
+        console.log('Can not getAttributeParamsFrom:', value);
+        console.log('Of type:', valueType);
+        break;
+    }
+  }
+
+  return params
+}
+
+exports.getAttributeParamsFrom = getAttributeParamsFrom;
