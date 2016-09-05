@@ -1,6 +1,6 @@
 var Rx = require('rx');
 var AWS = require('aws-sdk');
-// AWS.config.loadFromPath('config.json');
+AWS.config.loadFromPath('config.json');
 
 // ------------ Context ------------
 
@@ -237,3 +237,26 @@ function getAttributeParamsFrom(params) {
 }
 
 exports.getAttributeParamsFrom = getAttributeParamsFrom;
+
+// ------------ Rx ------------
+
+function observableGroup(observables) {
+
+  if (observables.length == 0) {
+    return Rx.Observable.just([])
+  } else if (observables.length == 1) {
+    return observables[0].take(1).map(data => [data])
+  }
+
+  observables = observables.map(datas => datas.catch(error => {
+      console.log(error)
+      return Rx.Observable.just()
+    }
+  ))
+
+  return  Rx.Observable.zip(observables)
+    .take(1)
+    .map(datas => datas.filter(n => n))
+}
+
+exports.observableGroup = observableGroup;

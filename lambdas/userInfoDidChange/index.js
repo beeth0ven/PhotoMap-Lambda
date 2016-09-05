@@ -7,12 +7,9 @@ var UserInfo = require('./models/userInfo.js');
 exports.handler = function(event, context) {
 
   console.log(JSON.stringify(event, null, 2));
-  var rx_records = event.Records.map (function (record) {
-      return rx_recordDidChange(record)
-        .catch(function (error) { return Rx.Observable.just(error) })
-  })
+  var rx_records = event.Records.map(record => rx_recordDidChange(record))
 
-  Rx.Observable.combineLatest(rx_records)
+  RxAWS.observableGroup(rx_records)
     .subscribe(
       function (x)      { RxAWS.handleSucceed(x, context)  },
       function (error)  { RxAWS.handleError(error, context) },

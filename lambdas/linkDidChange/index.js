@@ -10,13 +10,10 @@ var Link = require('./models/link.js');
 
 exports.handler = function(event, context) {
 
-  console.log(JSON.stringify(event, null, 2));
-  var rx_records = event.Records.map (function (record) {
-      return rx_recordDidChange(record)
-        .catch(function (error) { return Rx.Observable.just(error) })
-  })
+  // console.log(JSON.stringify(event, null, 2));
+  var rx_recordDidChanges = event.Records.map(record => rx_recordDidChange(record))
 
-  Rx.Observable.combineLatest(rx_records)
+  RxAWS.observableGroup(rx_recordDidChanges)
     .subscribe(
       function (x)      { RxAWS.handleSucceed(x, context)  },
       function (error)  { RxAWS.handleError(error, context) },
@@ -85,7 +82,26 @@ function rx_linkDidDelete(record) {
 function rx_commentDidInsert(record) {
   console.log('Index commentDidInsert');
   var photoUpdater = new Photo.PhotoUpdater(record.dynamodb.NewImage.itemReference.S)
-  return photoUpdater.rx_increaseCommentCount()
+  var rx_increaseCommentCount = photoUpdater.rx_increaseCommentCount()
+
+  var rx_toUserInfo = UserInfo.rx_getFromReference(record.dynamodb.NewImage.toUserReference.S)
+  var rx_fromUserInfo = UserInfo.rx_getFromReference(record.dynamodb.NewImage.fromUserReference.S)
+  var rx_photo = Photo.rx_getFromReference(record.dynamodb.NewImage.itemReference.S)
+  var rx_publishToTopicArn = Rx.Observable.combineLatest(
+    rx_toUserInfo,
+    rx_fromUserInfo,
+    rx_photo,
+    function (toUserInfo, fromUserInfo, photo) {
+       return [fromUserInfo.displayName.S + '评论了你的照片 -- ' + photo.title.S, toUserInfo.snsTopicArn.S]
+    })
+    .flatMap (function (data) {
+      return rxSNS.rx_publishToTopicArn(data[0], data[1])
+    })
+
+  return RxAWS.observableGroup([
+    rx_increaseCommentCount,
+    rx_publishToTopicArn
+  ])
 }
 
 function rx_commentDidDelete(record) {
@@ -96,25 +112,31 @@ function rx_commentDidDelete(record) {
 
 function rx_likePhotoLinkDidInsert(record) {
   console.log('Index likePhotoLinkDidInsert');
+
   var photoUpdater = new Photo.PhotoUpdater(record.dynamodb.NewImage.itemReference.S)
   var fromUserUpdater = new UserInfo.UserInfoUpdater(record.dynamodb.NewImage.fromUserReference.S)
-  return photoUpdater.rx_increaseLikedCount()
-    .flatMap (function (data) { return fromUserUpdater.rx_increaseLikedCount() })
-    .flatMap (function (data) {
-      var rx_toUserInfo = UserInfo.rx_getFromReference(record.dynamodb.NewImage.toUserReference.S)
-      var rx_fromUserInfo = UserInfo.rx_getFromReference(record.dynamodb.NewImage.fromUserReference.S)
-      var rx_photo = Photo.rx_getFromReference(record.dynamodb.NewImage.itemReference.S)
-      return Rx.Observable.combineLatest(
-        rx_toUserInfo,
-        rx_fromUserInfo,
-        rx_photo,
-        function (toUserInfo, fromUserInfo, photo) {
-           return [fromUserInfo.displayName.S + '喜欢了你的照片 -- ' + photo.title.S, toUserInfo.snsTopicArn.S]
-        })
+  var rx_increasePhotoLikedCount = photoUpdater.rx_increaseLikedCount()
+  var rx_increaseFromUserLikedCount = fromUserUpdater.rx_increaseLikedCount()
+
+  var rx_toUserInfo = UserInfo.rx_getFromReference(record.dynamodb.NewImage.toUserReference.S)
+  var rx_fromUserInfo = UserInfo.rx_getFromReference(record.dynamodb.NewImage.fromUserReference.S)
+  var rx_photo = Photo.rx_getFromReference(record.dynamodb.NewImage.itemReference.S)
+  var rx_publishToTopicArn = Rx.Observable.combineLatest(
+    rx_toUserInfo,
+    rx_fromUserInfo,
+    rx_photo,
+    function (toUserInfo, fromUserInfo, photo) {
+       return [fromUserInfo.displayName.S + '喜欢了你的照片 -- ' + photo.title.S, toUserInfo.snsTopicArn.S]
     })
     .flatMap (function (data) {
       return rxSNS.rx_publishToTopicArn(data[0], data[1])
     })
+
+  return RxAWS.observableGroup([
+    rx_increasePhotoLikedCount,
+    rx_increaseFromUserLikedCount,
+    rx_publishToTopicArn
+  ])
 }
 
 function rx_likePhotoLinkDidDelete(record) {
@@ -131,10 +153,26 @@ function rx_followUserLinkDidInsert(record) {
   console.log('Index followUserLinkDidInsert');
   var fromUserUpdater = new UserInfo.UserInfoUpdater(record.dynamodb.NewImage.fromUserReference.S)
   var toUserUpdater = new UserInfo.UserInfoUpdater(record.dynamodb.NewImage.toUserReference.S)
-  return fromUserUpdater.rx_increaseFollowCount()
-    .flatMap (function (data) {
-        return toUserUpdater.rx_increaseFollowerCount()
+  var rx_increaseFromUserFollowCount = fromUserUpdater.rx_increaseFollowCount()
+  var rx_increaseToUserFollowerCount = toUserUpdater.rx_increaseFollowerCount()
+
+  var rx_toUserInfo = UserInfo.rx_getFromReference(record.dynamodb.NewImage.toUserReference.S)
+  var rx_fromUserInfo = UserInfo.rx_getFromReference(record.dynamodb.NewImage.fromUserReference.S)
+  var rx_publishToTopicArn = Rx.Observable.combineLatest(
+    rx_toUserInfo,
+    rx_fromUserInfo,
+    function (toUserInfo, fromUserInfo) {
+       return [fromUserInfo.displayName.S + '正在关注你！', toUserInfo.snsTopicArn.S]
     })
+    .flatMap (function (data) {
+      return rxSNS.rx_publishToTopicArn(data[0], data[1])
+    })
+
+  return RxAWS.observableGroup([
+    rx_increaseFromUserFollowCount,
+    rx_increaseToUserFollowerCount,
+    rx_publishToTopicArn
+  ])
 }
 
 function rx_followUserLinkDidDelete(record) {

@@ -52,8 +52,6 @@ function PhotoUpdater(reference) {
   this.rx_addNumberForKey = function (number, key) {
     var params = getParams(reference)
     params.AttributeUpdates = RxAWS.getAddParamsFrom({ [key]: number })
-    // console.log('rx_addNumberForKey', params);
-    console.log('AttributeUpdates', params.AttributeUpdates);
     return rxDynamodb.rx_updateItem(params)
   }
 }
