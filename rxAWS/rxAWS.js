@@ -18,6 +18,40 @@ exports.handleDone = function (context) {
   context.done();
 }
 
+// ------------ S3 ------------
+
+var s3 = new AWS.S3();
+
+function RxS3() {
+
+  this.rx_deleteS3Object = function (bucket, key) {
+
+    return Rx.Observable.create((observer) => {
+
+      var params = {
+        Bucket: bucket,
+        Key: key
+      };
+
+      console.log('RxS3 Deleting S3Object:', key);
+
+      s3.deleteObject(params, function(error, data) {
+        if (error) {
+          console.log('RxS3 Did Fail to Delete S3Object:', key);
+          observer.onError(error);
+        } else {
+          console.log('RxS3 Did Delete S3Object:', key);
+          observer.onNext(data);
+          observer.onCompleted();
+        };
+      });
+
+    })
+  }
+}
+
+exports.RxS3 = RxS3;
+
 // ------------ SNS ------------
 
 var sns = new AWS.SNS();
@@ -106,7 +140,6 @@ function RxSNS() {
         }
       })
 
-
     })
   }
 }
@@ -162,6 +195,49 @@ function RxDynamoDB() {
     })
     .map(function (data) { return data.Item })
   }
+
+  this.rx_deleteItem = function (params) {
+
+    return Rx.Observable.create(function(observer) {
+
+      var tableName = params.TableName
+
+      console.log('RxDynamoDB Deleting', tableName);
+
+      dynamodb.deleteItem(params, function(error, data) {
+        if (error) {
+          console.log('RxDynamoDB Did Fail to Delete', tableName);
+          observer.onError(error);
+        } else {
+          console.log('RxDynamoDB Did Delete', tableName);
+          observer.onNext(data);
+          observer.onCompleted();
+        };
+      });
+    })
+  }
+
+  this.rx_batchWriteItem = function (params) {
+
+    return Rx.Observable.create(function(observer) {
+
+      var tableNames = Object.keys(params.RequestItems)
+
+      console.log('RxDynamoDB Writing Items', tableNames);
+
+      dynamodb.batchWriteItem(params, function(error, data) {
+        if (error) {
+          console.log('RxDynamoDB Did Fail to Write Items', tableNames);
+          observer.onError(error);
+        } else {
+          console.log('RxDynamoDB Did Write Items', tableNames);
+          observer.onNext(data);
+          observer.onCompleted();
+        };
+      });
+    })
+  }
+
 }
 
 exports.RxDynamoDB = RxDynamoDB;

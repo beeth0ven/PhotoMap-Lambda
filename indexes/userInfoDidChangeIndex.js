@@ -1,8 +1,8 @@
 // ------------ UserInfoDidChange ------------
 
 var Rx = require('rx');
-var RxAWS = require('./rxAWS/rxAWS.js');
-var UserInfo = require('./models/userInfo.js');
+var RxAWS = require('../rxAWS/rxAWS.js');
+var UserInfo = require('../models/userInfo.js');
 
 exports.handler = function(event, context) {
 

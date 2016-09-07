@@ -624,7 +624,7 @@ exports.photoDidDelete =
                         "N": "1471238431.666237"
                     },
                     "thumbnailImageS3Key": {
-                        "S": "public/1471238411.21948.png"
+                        "S": "public/1473050586.0138.png"
                     },
                     "userReference": {
                         "S": "[\"us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d2\",1471233536.58108]"
@@ -633,7 +633,7 @@ exports.photoDidDelete =
                         "S": "test"
                     },
                     "imageS3Key": {
-                        "S": "public/1471238411.21838.png"
+                        "S": "public/1473050586.0121.png"
                     }
                 },
                 "SequenceNumber": "76360600000000007123315865",

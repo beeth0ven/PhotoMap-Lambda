@@ -1,16 +1,16 @@
 // ------------ LinkDidChange ------------
 
 var Rx = require('rx');
-var RxAWS = require('./rxAWS/rxAWS.js');
+var RxAWS = require('../rxAWS/rxAWS.js');
 var rxSNS = new RxAWS.RxSNS();
 
-var UserInfo = require('./models/userInfo.js');
-var Photo = require('./models/photo.js');
-var Link = require('./models/link.js');
+var UserInfo = require('../models/userInfo.js');
+var Photo = require('../models/photo.js');
+var Link = require('../models/link.js');
 
 exports.handler = function(event, context) {
 
-  // console.log(JSON.stringify(event, null, 2));
+  console.log(JSON.stringify(event, null, 2));
   var rx_recordDidChanges = event.Records.map(record => rx_recordDidChange(record))
 
   RxAWS.observableGroup(rx_recordDidChanges)
