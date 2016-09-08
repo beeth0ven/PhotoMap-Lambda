@@ -9,17 +9,17 @@ const TableName = 'photomap-mobilehub-567053031-UserInfo';
 function getParams(reference) {
   var keys = JSON.parse(reference)
   return {
-    'Key': RxAWS.getAttributeParamsFrom({
-              'userId': keys[0],
-              'creationTime': keys[1]
-           }),
-    'TableName': TableName
+    Key: {
+        userId: keys[0],
+        creationTime: keys[1]
+     },
+     TableName: TableName
   }
 }
 
 function rx_getFromReference(reference) {
   var params = getParams(reference)
-  return rxDynamodb.rx_getItem(params)
+  return rxDynamodb.rx_get(params)
 }
 
 exports.rx_getFromReference = rx_getFromReference;
@@ -59,8 +59,14 @@ function UserInfoUpdater(reference) {
 
   this.rx_setSnsTopicArn = function (topicArn) {
     var params = getParams(reference)
-    params.AttributeUpdates = RxAWS.getPutParamsFrom({ 'snsTopicArn': topicArn })
-    return rxDynamodb.rx_updateItem(params)
+    params.AttributeUpdates =
+    {
+      snsTopicArn: {
+        Action: 'PUT',
+        Value: topicArn
+      }
+    }
+    return rxDynamodb.rx_update(params)
   }
 
   this.rx_increaseFollowCount = function () {
@@ -105,8 +111,14 @@ function UserInfoUpdater(reference) {
 
   this.rx_addNumberForKey = function (number, key) {
     var params = getParams(reference)
-    params.AttributeUpdates = RxAWS.getAddParamsFrom({ [key]: number })
-    return rxDynamodb.rx_updateItem(params)
+    params.AttributeUpdates =
+    {
+      [key]: {
+        Action: 'ADD',
+        Value: number
+      }
+    }
+    return rxDynamodb.rx_update(params)
   }
 }
 

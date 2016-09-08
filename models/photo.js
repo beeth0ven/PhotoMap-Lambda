@@ -8,17 +8,17 @@ const TableName = 'photomap-mobilehub-567053031-Photo';
 function getParams(reference) {
   var keys = JSON.parse(reference)
   return {
-    'Key': RxAWS.getAttributeParamsFrom({
-              'userReference': keys[0],
-              'creationTime': keys[1]
-           }),
-    'TableName': TableName
+    Key: {
+      userReference: keys[0],
+      creationTime: keys[1]
+   },
+    TableName: TableName
   }
 }
 
 function rx_getFromReference(reference) {
   var params = getParams(reference)
-  return rxDynamodb.rx_getItem(params)
+  return rxDynamodb.rx_get(params)
 }
 
 exports.rx_getFromReference = rx_getFromReference;
@@ -51,8 +51,14 @@ function PhotoUpdater(reference) {
 
   this.rx_addNumberForKey = function (number, key) {
     var params = getParams(reference)
-    params.AttributeUpdates = RxAWS.getAddParamsFrom({ [key]: number })
-    return rxDynamodb.rx_updateItem(params)
+    params.AttributeUpdates =
+    {
+      [key]: {
+        Action: 'ADD',
+        Value: number
+      }
+    }
+    return rxDynamodb.rx_update(params)
   }
 }
 

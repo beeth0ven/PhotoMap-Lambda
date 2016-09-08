@@ -5,7 +5,7 @@ AWS.config.loadFromPath('config.json');
 // ------------ Context ------------
 
 exports.handleSucceed = function (x, context) {
-  console.log("Context Succeed:", x);
+  console.log("Context next:", x);
 }
 
 exports.handleError = function (error, context) {
@@ -148,18 +148,15 @@ exports.RxSNS = RxSNS;
 
 // ------------ DynamoDB ------------
 
-var dynamodb = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
+var docClient = new AWS.DynamoDB.DocumentClient();
 
-function RxDynamoDB() {
+class RxDynamoDB {
 
-  this.rx_updateItem = function (params) {
-
+  rx_update(params) {
     return Rx.Observable.create(function(observer) {
       var tableName = params.TableName
-
       console.log('RxDynamoDB Updating', tableName);
-
-      dynamodb.updateItem(params, function(error, data) {
+      docClient.update(params, function(error, data) {
         if (error) {
           console.log('RxDynamoDB Did Fail to Update', tableName);
           observer.onError(error);
@@ -169,42 +166,31 @@ function RxDynamoDB() {
           observer.onCompleted();
         };
       });
-
     });
   }
 
-  this.rx_getItem = function (params) {
-
+  rx_get(params) {
     return Rx.Observable.create(function(observer) {
-
       var tableName = params.TableName
-
       console.log('RxDynamoDB Getting', tableName);
-
-      dynamodb.getItem(params, function(error, data) {
+      docClient.get(params, function(error, data) {
         if (error) {
           console.log('RxDynamoDB Did Fail to Get', tableName);
           observer.onError(error);
         } else {
           console.log('RxDynamoDB Did Get', tableName);
-          observer.onNext(data);
+          observer.onNext(data.Item);
           observer.onCompleted();
         };
       });
-
     })
-    .map(function (data) { return data.Item })
   }
 
-  this.rx_deleteItem = function (params) {
-
+  rx_delete(params) {
     return Rx.Observable.create(function(observer) {
-
       var tableName = params.TableName
-
       console.log('RxDynamoDB Deleting', tableName);
-
-      dynamodb.deleteItem(params, function(error, data) {
+      docClient.delete(params, function(error, data) {
         if (error) {
           console.log('RxDynamoDB Did Fail to Delete', tableName);
           observer.onError(error);
@@ -217,15 +203,11 @@ function RxDynamoDB() {
     })
   }
 
-  this.rx_batchWriteItem = function (params) {
-
+  rx_batchWrite(params) {
     return Rx.Observable.create(function(observer) {
-
       var tableNames = Object.keys(params.RequestItems)
-
       console.log('RxDynamoDB Writing Items', tableNames);
-
-      dynamodb.batchWriteItem(params, function(error, data) {
+      docClient.batchWrite(params, function(error, data) {
         if (error) {
           console.log('RxDynamoDB Did Fail to Write Items', tableNames);
           observer.onError(error);
@@ -245,74 +227,6 @@ exports.RxDynamoDB = RxDynamoDB;
 exports.Insert = "INSERT";
 exports.Modify = "MODIFY";
 exports.Remove = "REMOVE";
-
-function getAddParamsFrom(params) {
-  return getUpdateParamsForActionFromParams('ADD', params)
-}
-
-function getPutParamsFrom(params) {
-  return getUpdateParamsForActionFromParams('PUT', params)
-}
-
-function getUpdateParamsForActionFromParams(action ,params) {
-  for (var key in params) {
-    var value = params[key]
-    var valueType = typeof value
-    switch (valueType) {
-      case 'number':
-        params[key] = {
-          'Action': action,
-          'Value': { 'N': value.toString() }
-        }
-        break;
-
-      case 'string':
-        params[key] = {
-          'Action': action,
-          'Value': { 'S': value }
-        }
-        break;
-
-      default:
-        console.log('Can not getAddAttributeParamsFrom:', value);
-        console.log('Of type:', valueType);
-        break;
-    }
-  }
-  return params
-}
-
-exports.getAddParamsFrom = getAddParamsFrom;
-exports.getPutParamsFrom = getPutParamsFrom;
-
-function getAttributeParamsFrom(params) {
-
-  for (var key in params) {
-    var value = params[key]
-    var valueType = typeof value
-    switch (valueType) {
-      case 'number':
-        params[key] = {
-          'N': value.toString()
-        }
-        break;
-      case 'string':
-        params[key] = {
-          'S': value
-        }
-        break;
-
-      default:
-        console.log('Can not getAttributeParamsFrom:', value);
-        console.log('Of type:', valueType);
-        break;
-    }
-  }
-
-  return params
-}
-
-exports.getAttributeParamsFrom = getAttributeParamsFrom;
 
 // ------------ Rx ------------
 
