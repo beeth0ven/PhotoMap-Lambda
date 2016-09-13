@@ -94,7 +94,7 @@ function RxSNS() {
           observer.onError(error);
         } else {
           console.log('RxSNS Did Delete topic', topicArn);
-          observer.onNext(data);
+          observer.onNext(data.ResponseMetadata);
           observer.onCompleted();
         };
       });

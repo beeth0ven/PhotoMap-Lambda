@@ -2,124 +2,84 @@
 
 var RxAWS = require('../rxAWS/rxAWS.js');
 var rxSNS = new RxAWS.RxSNS();
-var rxDynamodb = new RxAWS.RxDynamoDB();
+var DynamoDBModel = require('../rxAWS/dynamoDBModel.js');
 
-const TableName = 'photomap-mobilehub-567053031-UserInfo';
+class UserInfo extends DynamoDBModel.DynamoDBModel {
 
-function getParams(reference) {
-  var keys = JSON.parse(reference)
-  return {
-    Key: {
-        userId: keys[0],
-        creationTime: keys[1]
-     },
-     TableName: TableName
-  }
-}
-
-function rx_getFromReference(reference) {
-  var params = getParams(reference)
-  return rxDynamodb.rx_get(params)
-}
-
-exports.rx_getFromReference = rx_getFromReference;
-
-// ------------ UserInfoRecord ------------
-
-function UserInfoRecord(record) {
-
-  this.record = record
-
-  this.rx_createTopic = function () {
-    console.log('UserInfoRecord rx_createTopic');
-    var userId = this.record.dynamodb.Keys.userId.S; var creationTime = Number(this.record.dynamodb.Keys.creationTime.N)
-    var reference = JSON.stringify([userId, creationTime]); var userUpdater = new UserInfoUpdater(reference)
-    var topicName = userId.replace(":", "-");
-    return rxSNS.rx_createTopic(topicName)
-      .map(function (data) { return data.TopicArn })
-      .flatMap(function (topicArn) {
-        return userUpdater.rx_setSnsTopicArn(topicArn)
-      })
-  };
-
-  this.rx_deleteTopic = function () {
-    console.log('UserInfoRecord rx_deleteTopic');
-    var snsTopicArn = this.record.dynamodb.OldImage.snsTopicArn.S;
-    return rxSNS.rx_deleteTopicArn(snsTopicArn);
-  };
-};
-
-exports.UserInfoRecord = UserInfoRecord;
-
-// ------------ UserInfoUpdater ------------
-
-function UserInfoUpdater(reference) {
-
-  this.reference = reference;
-
-  this.rx_setSnsTopicArn = function (topicArn) {
-    var params = getParams(reference)
-    params.AttributeUpdates =
-    {
-      snsTopicArn: {
-        Action: 'PUT',
-        Value: topicArn
-      }
-    }
-    return rxDynamodb.rx_update(params)
+  get dynamoDBTableName() {
+    return 'photomap-mobilehub-567053031-UserInfo'
   }
 
-  this.rx_increaseFollowCount = function () {
-    console.log('UserInfoUpdater rx_increaseFollowCount');
+  get hashKeyAttribute() {
+    return 'userId'
+  }
+
+  get rangeKeyAttribute() {
+    return 'creationTime'
+  }
+
+  rx_setSnsTopicArn(topicArn) {
+    console.log('UserInfo rx_setSnsTopicArn');
+    return this.rx_setValueForKey(topicArn, 'topicArn')
+  }
+
+  rx_increaseFollowCount() {
+    console.log('UserInfo rx_increaseFollowCount');
     return this.rx_addNumberForKey(1, 'followingNumber')
   }
 
-  this.rx_decreaseFollowCount = function () {
-    console.log('UserInfoUpdater rx_decreaseFollowCount');
+  rx_decreaseFollowCount() {
+    console.log('UserInfo rx_decreaseFollowCount');
     return this.rx_addNumberForKey(-1, 'followingNumber')
   }
 
-  this.rx_increaseFollowerCount = function () {
-    console.log('UserInfoUpdater rx_increaseFollowerCount');
+  rx_increaseFollowerCount() {
+    console.log('UserInfo rx_increaseFollowerCount');
     return this.rx_addNumberForKey(1, 'followersNumber')
   }
 
-  this.rx_decreaseFollowerCount = function () {
-    console.log('UserInfoUpdater rx_decreaseFollowerCount');
+  rx_decreaseFollowerCount() {
+    console.log('UserInfo rx_decreaseFollowerCount');
     return this.rx_addNumberForKey(-1, 'followersNumber')
   }
 
-  this.rx_increaseLikedCount = function () {
-    console.log('UserInfoUpdater rx_increaseFollowCount');
+  rx_increaseLikedCount() {
+    console.log('UserInfo rx_increaseFollowCount');
     return this.rx_addNumberForKey(1, 'likedNumber')
   }
 
-  this.rx_decreaseLikedCount = function () {
-    console.log('UserInfoUpdater rx_decreaseLikedCount');
+  rx_decreaseLikedCount() {
+    console.log('UserInfo rx_decreaseLikedCount');
     return this.rx_addNumberForKey(-1, 'likedNumber')
   }
 
-  this.rx_increasePostedCount = function () {
-    console.log('UserInfoUpdater rx_increasePostedCount');
+  rx_increasePostedCount() {
+    console.log('UserInfo rx_increasePostedCount');
     return this.rx_addNumberForKey(1, 'postedNumber')
   }
 
-  this.rx_decreasePostedCount = function () {
-    console.log('UserInfoUpdater rx_decreasePostedCount');
+  rx_decreasePostedCount() {
+    console.log('UserInfo rx_decreasePostedCount');
     return this.rx_addNumberForKey(-1, 'postedNumber')
   }
 
-  this.rx_addNumberForKey = function (number, key) {
-    var params = getParams(reference)
-    params.AttributeUpdates =
-    {
-      [key]: {
-        Action: 'ADD',
-        Value: number
-      }
-    }
-    return rxDynamodb.rx_update(params)
-  }
+  rx_createTopic() {
+    console.log('UserInfo rx_createTopic');
+    this.hashValue = this.record.dynamodb.Keys.userId.S; this.rangeValue = Number(this.record.dynamodb.Keys.creationTime.N)
+    var userInfo = this
+    var topicName = this.hashValue.replace(":", "-");
+    return rxSNS.rx_createTopic(topicName)
+      .map(function (data) { return data.TopicArn })
+      .flatMap(function (topicArn) {
+        return userInfo.rx_setSnsTopicArn(topicArn)
+      })
+  };
+
+  rx_deleteTopic() {
+    console.log('UserInfo rx_deleteTopic');
+    var snsTopicArn = this.record.dynamodb.OldImage.snsTopicArn.S;
+    return rxSNS.rx_deleteTopicArn(snsTopicArn);
+  };
 }
 
-exports.UserInfoUpdater = UserInfoUpdater;
+exports.UserInfo = UserInfo

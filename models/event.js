@@ -690,3 +690,50 @@ exports.userInfoDidInsert = {
         }
     ]
 };
+
+exports.userInfoDidDelete = {
+    "Records": [
+        {
+            "eventID": "7f90e65c29caa4fc62a94075c6f847c6",
+            "eventName": "REMOVE",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "us-east-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1471581360,
+                "Keys": {
+                    "creationTime": {
+                        "N": "1471234536.58108"
+                    },
+                    "userId": {
+                        "S": "us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d8"
+                    }
+                },
+                "OldImage": {
+                    "followersNumber": {
+                        "N": "0"
+                    },
+                    "creationTime": {
+                        "N": "1471234536.58108"
+                    },
+                    "displayName": {
+                        "S": "Test"
+                    },
+                    "imagePath": {
+                        "S": "https://scontent.xx.fbcdn.net/v/t1.0-1/p200x200/10441352_1577799582504350_7424084453542704415_n.jpg?oh=621c1f9ea2f608453d0cf5bd5c56b4e1&oe=581F5E63"
+                    },
+                    "userId": {
+                        "S": "us-east-1:fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d8"
+                    },
+                    "snsTopicArn": {
+                        "S": "arn:aws:sns:us-east-1:649756765455:us-east-1-fd3cfbd9-58cd-4cec-8fc0-beb8e5bb44d8"
+                    }
+                },
+                "SequenceNumber": "22161900000000007104612404",
+                "SizeBytes": 333,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:649756765455:table/photomap-mobilehub-567053031-UserInfo/stream/2016-08-19T04:33:32.032"
+        }
+    ]
+};

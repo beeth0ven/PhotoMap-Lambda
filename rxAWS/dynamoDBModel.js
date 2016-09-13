@@ -1,16 +1,18 @@
+var RxAWS = require('./rxAWS.js');
+var rxDynamodb = new RxAWS.RxDynamoDB();
+
 class DynamoDBModel {
-  constructor() {}
 
   get dynamoDBTableName() {
-    return 'photomap-mobilehub-567053031-Photo'
+    return
   }
 
   get hashKeyAttribute() {
-    return 'userReference'
+    return
   }
 
   get rangeKeyAttribute() {
-    return 'creationTime'
+    return
   }
 
   get hashValue() {
@@ -22,6 +24,7 @@ class DynamoDBModel {
   }
 
   get rangeValue() {
+    if (this.rangeKeyAttribute === undefined) { return }
     return this[this.rangeKeyAttribute]
   }
 
@@ -33,20 +36,24 @@ class DynamoDBModel {
     var keys = JSON.parse(reference)
     this.hashValue = keys[0]
     this.rangeValue = keys[1]
+    return this
   }
 
   getParams() {
-    return {
+    var params = {
       Key: {
         [this.hashKeyAttribute]: this.hashValue,
-        [this.rangeKeyAttribute]: this.rangeValue
       },
       TableName: this.dynamoDBTableName
     }
+    if (this.rangeKeyAttribute !== undefined) {
+      params.Key[this.rangeKeyAttribute] = this.rangeValue
+    }
+    return params
   }
 
   rx_setValueForKey(value, key) {
-    var params = getParams()
+    var params = this.getParams()
     params.AttributeUpdates =
     {
       [key]: {
@@ -58,7 +65,7 @@ class DynamoDBModel {
   }
 
   rx_addNumberForKey(number, key) {
-    var params = getParams()
+    var params = this.getParams()
     params.AttributeUpdates =
     {
       [key]: {
@@ -67,6 +74,14 @@ class DynamoDBModel {
       }
     }
     return rxDynamodb.rx_update(params)
+  }
+
+  rx_get() {
+    return rxDynamodb.rx_get(this.getParams())
+  }
+
+  rx_getFromReference(reference) {
+    return this.parseReference(reference).rx_get()
   }
 }
 
